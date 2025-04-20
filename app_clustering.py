@@ -1,46 +1,52 @@
 # -*- coding: utf-8 -*-
-# Created on Sat Apr 19 21:19:26 2025
+"""
+Created on Sat Apr 19 21:19:26 2025
 
-# @author: Nongnuch
+@author: Nongnuch
+"""
 
-# app.py
 import streamlit as st
-import pickle
 import matplotlib.pyplot as plt
-from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.datasets import load_iris
 from sklearn.decomposition import PCA
 
-# Load model
-with open('kmeans_model.pkl', 'rb') as f:
-    loaded_model = pickle.load(f)
-
-# Set the page config
+# Set Streamlit page config
 st.set_page_config(page_title="K-Means Clustering App", layout="centered")
 
-# Set title
-st.title("🔍 K-Means Clustering Visualizer")
+# Title and description
+st.title("🔍 K-Means Clustering App with Iris Dataset")
+st.markdown("This interactive app performs **K-Means clustering** on the Iris dataset and visualizes the results using **2D PCA projection**.")
 
-# Display cluster centers
-st.subheader("🧪 Example Data for Visualization")
-st.markdown("This demo uses example data (2D PCA projection) to illustrate clustering results.")
+# Sidebar for user input
+st.sidebar.header("Configure Clustering")
+k = st.sidebar.slider("Select number of clusters (k)", min_value=2, max_value=10, value=4)
 
-# Generate synthetic 2D data
-X, _ = make_blobs(n_samples=300, centers=loaded_model.n_clusters, cluster_std=0.60, random_state=0)
+# Load Iris dataset
+data = load_iris()
+X = data.data
+features = data.feature_names
 
-# Predict using the loaded model
-y_kmeans = loaded_model.predict(X)
-
-# Apply PCA to reduce to 2D for visualization
+# Apply PCA to reduce to 2D
 pca = PCA(n_components=2)
 X_pca = pca.fit_transform(X)
-centers_pca = pca.transform(loaded_model.cluster_centers_)
+
+# Train KMeans with selected k
+kmeans = KMeans(n_clusters=k, random_state=0)
+y_kmeans = kmeans.fit_predict(X)
+
+# PCA projection of cluster centers
+centers_pca = pca.transform(kmeans.cluster_centers_)
 
 # Plotting
 fig, ax = plt.subplots()
-scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=y_kmeans, cmap='viridis', alpha=0.6)
-ax.scatter(centers_pca[:, 0], centers_pca[:, 1], s=300, c='red', marker='X', label='Cluster Centers')
-ax.set_title('k-Means Clustering (2D PCA Projection)')
-ax.set_xlabel('PCA Component 1')
-ax.set_ylabel('PCA Component 2')
-ax.legend()
+scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=y_kmeans, cmap='rainbow', s=50)
+ax.scatter(centers_pca[:, 0], centers_pca[:, 1], c='black', s=200, alpha=0.6, marker='X', label='Centroids')
+ax.set_title("Clusters (2D PCA Projection)")
+ax.set_xlabel("PCA1")
+ax.set_ylabel("PCA2")
+legend_labels = [f"Cluster {i}" for i in range(k)]
+legend = ax.legend(handles=scatter.legend_elements()[0], labels=legend_labels, title="Clusters")
+
+# Show plot
 st.pyplot(fig)
