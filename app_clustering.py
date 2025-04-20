@@ -15,7 +15,7 @@ from sklearn.decomposition import PCA
 st.set_page_config(page_title="K-Means Clustering App", layout="centered")
 
 # Title and description
-st.title("🔍 K-Means Clustering App with Iris Dataset")
+st.title("🔍 K-Means Clustering App with Iris Dataset by Jhomphon Pothong")
 st.markdown("This interactive app performs **K-Means clustering** on the Iris dataset and visualizes the results using **2D PCA projection**.")
 
 # Sidebar for user input
@@ -41,7 +41,6 @@ centers_pca = pca.transform(kmeans.cluster_centers_)
 # Plotting
 fig, ax = plt.subplots()
 scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=y_kmeans, cmap='rainbow', s=50)
-ax.scatter(centers_pca[:, 0], centers_pca[:, 1], c='black', s=200, alpha=0.6, marker='X', label='Centroids')
 ax.set_title("Clusters (2D PCA Projection)")
 ax.set_xlabel("PCA1")
 ax.set_ylabel("PCA2")
